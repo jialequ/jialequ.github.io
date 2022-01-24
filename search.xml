@@ -47,8 +47,11 @@
 
 <h3 id="5-设置开机自启"><a href="#5-设置开机自启" class="headerlink" title="5.设置开机自启"></a>5.设置开机自启</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#重启PPTP服务</span><br><span class="line">[root@199 ~]# systemctl restart pptpd</span><br><span class="line"> </span><br><span class="line">#设置开机自启</span><br><span class="line">[root@199 ~]# systemctl enable pptpd.service</span><br></pre></td></tr></table></figure>
 
-<h3 id="6-尽情上网吧"><a href="#6-尽情上网吧" class="headerlink" title="6.尽情上网吧"></a>6.尽情上网吧</h3><p>Android配置：</p>
-<p>Windows配置:<br><img src="/image/PPTP-windows%E8%BF%9E%E6%8E%A5.jpg" alt="windows配置示例"></p>
+<h3 id="6-尽情上网吧"><a href="#6-尽情上网吧" class="headerlink" title="6.尽情上网吧"></a>6.尽情上网吧</h3><p>Android配置:  </p>
+<img src="/2022/01/24/CentOS7%E6%90%AD%E5%BB%BAPPTP%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%95%99%E7%A8%8B/PPTP-android连接.jpg" width="50%">
+
+<p>Windows配置:设置-&gt;网络和Internet-&gt;VPN-&gt;添加VPN连接  </p>
+<p><img src="/2022/01/24/CentOS7%E6%90%AD%E5%BB%BAPPTP%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%95%99%E7%A8%8B/PPTP-windows%E8%BF%9E%E6%8E%A5.jpg" alt="windows配置示例"></p>
 ]]></content>
       <categories>
         <category>常用服务</category>

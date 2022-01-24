@@ -1,6 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>CentOS7搭建PPTP服务端教程</title>
+    <url>/2022/01/24/CentOS7%E6%90%AD%E5%BB%BAPPTP%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<p>因为一些原因，可能大家需要用”某种技术”访问一些<a href="https://ingg.cn/post/43.html">GFW</a>不让访问的网站，今天我们就来解决这个问题。  </p>
+<span id="more"></span>
+
+<h2 id="CentOS7搭建PPTP服务端（照着抄系列）"><a href="#CentOS7搭建PPTP服务端（照着抄系列）" class="headerlink" title="CentOS7搭建PPTP服务端（照着抄系列）"></a>CentOS7搭建PPTP服务端（照着抄系列）</h2><p>PS：首先你要有一台境外服务器。</p>
+<h3 id="1-查看是否支持搭建"><a href="#1-查看是否支持搭建" class="headerlink" title="1.查看是否支持搭建"></a>1.查看是否支持搭建</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@199 ~]# modprobe ppp-compress-18 &amp;&amp; echo yes</span><br><span class="line">yes</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-安装一些需要的包"><a href="#2-安装一些需要的包" class="headerlink" title="2.安装一些需要的包"></a>2.安装一些需要的包</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">[root@199 ~]# yum install epel-release -y</span><br><span class="line">[root@199 ~]# yum install ppp ppp-devel pptpd iptables iptables-services -y</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-修改配置文件"><a href="#3-修改配置文件" class="headerlink" title="3.修改配置文件"></a>3.修改配置文件</h3><h4 id="1-修改options-pptpd"><a href="#1-修改options-pptpd" class="headerlink" title="(1) 修改options.pptpd"></a>(1) 修改options.pptpd</h4><blockquote>
+<p>[root@199 ~]# vim /etc/ppp/options.pptpd</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 开放下面的这些</span><br><span class="line">name pptpd</span><br><span class="line">refuse-pap</span><br><span class="line">refuse-chap</span><br><span class="line">refuse-mschap</span><br><span class="line">require-mschap-v2</span><br><span class="line">require-mppe-128</span><br><span class="line">ms-dns 8.8.8.8</span><br><span class="line">ms-dns 8.8.4.4</span><br><span class="line">proxyarp</span><br><span class="line">lock</span><br><span class="line">nobsdcomp</span><br><span class="line">novj</span><br><span class="line">novjccomp</span><br><span class="line">nologfd</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-修改chap-secrets"><a href="#2-修改chap-secrets" class="headerlink" title="(2) 修改chap-secrets"></a>(2) 修改chap-secrets</h4><blockquote>
+<p>[root@199 ~]# vim /etc/ppp/chap-secrets</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 添加下面一行，test为登录用户名，123456是密码</span><br><span class="line">&quot;test&quot; * &quot;123456&quot; *</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-修改pptpd-conf"><a href="#3-修改pptpd-conf" class="headerlink" title="(3) 修改pptpd.conf"></a>(3) 修改pptpd.conf</h4><blockquote>
+<p>[root@199 ~]# vim /etc/pptpd.conf</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">localip 192.168.0.1</span><br><span class="line">remoteip 192.168.0.234-238,192.168.0.245</span><br></pre></td></tr></table></figure>
+
+<h4 id="4-修改sysctl-conf"><a href="#4-修改sysctl-conf" class="headerlink" title="(4) 修改sysctl.conf"></a>(4) 修改sysctl.conf</h4><blockquote>
+<p>[root@199 ~]# vim /etc/sysctl.conf</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 下面这行修改为1，没有就添加这行进去</span><br><span class="line">net.ipv4.ip_forward=1</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>修改完这个文件之后执行sysctl -p</p>
+</blockquote>
+<h4 id="5-修改ip-up"><a href="#5-修改ip-up" class="headerlink" title="(5) 修改ip-up"></a>(5) 修改ip-up</h4><blockquote>
+<p>[root@199 ~]# vim /etc/ppp/ip-up</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># exit 0前加上下面一行</span><br><span class="line">ifconfig ppp0 mtu 1472</span><br></pre></td></tr></table></figure>
+
+<h4 id="6-修改rc-local"><a href="#6-修改rc-local" class="headerlink" title="(6) 修改rc.local"></a>(6) 修改rc.local</h4><blockquote>
+<p>[root@199 ~]# vim /etc/rc.d/rc.local</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 添加下面一行</span><br><span class="line">iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-开放所需端口"><a href="#4-开放所需端口" class="headerlink" title="4.开放所需端口"></a>4.开放所需端口</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># 添加下面两条规则</span><br><span class="line">[root@199 ~]# iptables -A INPUT -p gre -j ACCEPT</span><br><span class="line">[root@199 ~]# iptables -A INPUT -p tcp --dport 1723 -j ACCEPT</span><br><span class="line"></span><br><span class="line"># 保存规则</span><br><span class="line">[root@199 ~]# service iptables save</span><br><span class="line"># 重启生效</span><br><span class="line">[root@199 ~]# systemctl restart iptables</span><br></pre></td></tr></table></figure>
+
+<h3 id="5-设置开机自启"><a href="#5-设置开机自启" class="headerlink" title="5.设置开机自启"></a>5.设置开机自启</h3><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">#重启PPTP服务</span><br><span class="line">[root@199 ~]# systemctl restart pptpd</span><br><span class="line"> </span><br><span class="line">#设置开机自启</span><br><span class="line">[root@199 ~]# systemctl enable pptpd.service</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-尽情上网吧"><a href="#6-尽情上网吧" class="headerlink" title="6.尽情上网吧"></a>6.尽情上网吧</h3><p>Android配置：</p>
+<p>Windows配置:<br><img src="/image/PPTP-windows%E8%BF%9E%E6%8E%A5.jpg" alt="windows配置示例"></p>
+]]></content>
+      <categories>
+        <category>常用服务</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Hello</title>
     <url>/2022/01/21/Hello/</url>
     <content><![CDATA[<p>之前用的一直是CSDN博客，但是一直想要一个自己搭建的博客，所以今天花了一点时间搭建了一下，以后会在这里分享一些东西，希望大家多多关照，谢谢!</p>
